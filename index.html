@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI YIMING | Portfolio</title>
+    <meta name="description" content="BI YIMING — computational arts, audiovisual interaction, computer vision and spatial installation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300..900&family=Noto+Sans+SC:wght@300..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #181819;
+            --paper: #fafafa;
+            --muted: #727272;
+            --line: #c8c8c8;
+            --blue: #006efc;
+            --gap: 20px;
+            --page-x: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 62.5%;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Figtree", "Noto Sans SC", Helvetica, Arial, sans-serif;
+            font-size: 1.6rem;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        button,
+        a {
+            color: inherit;
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .loading {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            color: #fff;
+            font-size: clamp(2.4rem, 2vw, 4rem);
+            font-weight: 400;
+            text-align: center;
+            transition: opacity 800ms ease, visibility 800ms ease;
+        }
+
+        .loading.hidden {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .main {
+            position: relative;
+            min-height: 100vh;
+            background: var(--paper);
+            transition: color 260ms ease;
+        }
+
+        .main.is-previewing {
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .site-header,
+        .intro-list,
+        .work-list,
+        .footer-menu {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            column-gap: var(--gap);
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 20;
+            align-items: baseline;
+            padding: 32px var(--page-x) 0;
+        }
+
+        .site-title {
+            grid-column: 1 / 3;
+            font-size: clamp(1.4rem, 0.9vw, 2.4rem);
+            font-weight: 650;
+            line-height: 1;
+        }
+
+        .nav-list {
+            grid-column: 5 / 7;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            list-style: none;
+            font-size: clamp(1.4rem, 0.9vw, 2.4rem);
+        }
+
+        .nav-link {
+            border: 0;
+            border-bottom: 1px solid transparent;
+            background: transparent;
+            transition: opacity 220ms ease, border-color 220ms ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.current {
+            border-bottom-color: currentColor;
+        }
+
+        .nav-link:hover {
+            opacity: 0.62;
+        }
+
+        .intro-list {
+            position: relative;
+            z-index: 20;
+            margin: 180px var(--page-x) 0;
+            list-style: none;
+            font-size: clamp(1.4rem, 0.9vw, 2.4rem);
+        }
+
+        .intro-item:first-child {
+            grid-column: 2 / 3;
+        }
+
+        .intro-item:nth-child(2) {
+            grid-column: 3 / 4;
+        }
+
+        .intro-item:nth-child(3) {
+            grid-column: 4 / 5;
+        }
+
+        .intro-item:nth-child(4) {
+            grid-column: 5 / 7;
+        }
+
+        .intro-head {
+            font-weight: 600;
+        }
+
+        .intro-data {
+            margin-top: 8px;
+            color: var(--muted);
+        }
+
+        .hero-statement {
+            position: relative;
+            z-index: 20;
+            margin: 120px var(--page-x) 0;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            column-gap: var(--gap);
+        }
+
+        .hero-statement h1 {
+            grid-column: 2 / 6;
+            max-width: 980px;
+            font-size: clamp(5.8rem, 8vw, 14rem);
+            font-weight: 520;
+            line-height: 0.93;
+            letter-spacing: 0;
+        }
+
+        .hero-statement p {
+            grid-column: 5 / 7;
+            margin-top: 34px;
+            color: var(--muted);
+            font-size: clamp(1.4rem, 0.95vw, 2rem);
+        }
+
+        .work-preview {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 320ms ease;
+        }
+
+        .work-preview::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.16);
+            mix-blend-mode: multiply;
+        }
+
+        .work-preview.is-visible {
+            opacity: 1;
+        }
+
+        .work-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .works {
+            position: relative;
+            z-index: 20;
+            margin-top: 260px;
+        }
+
+        .work-list {
+            display: block;
+            list-style: none;
+        }
+
+        .work-item {
+            border-top: 1px solid var(--ink);
+            transition: padding-left 260ms ease, background 260ms ease, border-color 260ms ease;
+        }
+
+        .work-item:last-child {
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .main.is-previewing .work-item {
+            border-color: rgba(255, 255, 255, 0.72);
+        }
+
+        .work-item:hover,
+        .work-item:focus-within {
+            padding-left: calc((100vw - 100px) / 6 * 0.2);
+            background: rgba(255, 255, 255, 0.11);
+            backdrop-filter: blur(10px);
+        }
+
+        .work-link {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            column-gap: var(--gap);
+            align-items: baseline;
+            width: 100%;
+            padding: 36px var(--page-x);
+            border: 0;
+            background: transparent;
+            text-align: left;
+        }
+
+        .work-number {
+            padding-right: 52px;
+            text-align: right;
+        }
+
+        .work-title {
+            grid-column: 2 / 4;
+            font-size: clamp(1.5rem, 0.94vw, 3rem);
+            font-weight: 650;
+        }
+
+        .work-type {
+            grid-column: 5 / 6;
+            color: currentColor;
+        }
+
+        .work-date {
+            grid-column: 6 / 7;
+            text-align: right;
+        }
+
+        .mobile-works {
+            display: none;
+            position: relative;
+            z-index: 20;
+            margin-top: 166px;
+            padding-bottom: 96px;
+            list-style: none;
+        }
+
+        .mobile-item {
+            padding: 24px 20px 40px;
+            border-top: 1px solid var(--line);
+        }
+
+        .mobile-item:last-child {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .mobile-button {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            text-align: left;
+        }
+
+        .mobile-image {
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: #ececec;
+        }
+
+        .mobile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mobile-meta {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-rows: repeat(2, auto);
+            gap: 16px 10px;
+            align-items: baseline;
+            margin-top: 20px;
+            font-size: 1.4rem;
+        }
+
+        .mobile-number {
+            grid-column: 1 / 2;
+        }
+
+        .mobile-title {
+            grid-column: 2 / 7;
+            font-size: 1.5rem;
+            font-weight: 650;
+        }
+
+        .mobile-type {
+            grid-column: 2 / 5;
+            color: var(--muted);
+        }
+
+        .mobile-date {
+            grid-column: 5 / 7;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .site-footer {
+            position: relative;
+            z-index: 20;
+            background: var(--paper);
+            text-align: center;
+        }
+
+        .contact-panel {
+            display: block;
+            padding: 130px 24px 150px;
+            border-top: 1px solid var(--ink);
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .contact-caption {
+            font-size: clamp(1.5rem, 0.94vw, 3rem);
+            font-weight: 500;
+        }
+
+        .contact-mail {
+            display: inline;
+            position: relative;
+            font-size: clamp(4.8rem, 3vw, 5.6rem);
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .contact-mail::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: currentColor;
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 700ms ease;
+        }
+
+        .contact-panel:hover .contact-mail::after {
+            transform: scaleX(1);
+        }
+
+        .footer-menu {
+            align-items: baseline;
+            padding: 50px var(--page-x) 32px;
+            font-size: clamp(1.4rem, 0.9vw, 2.4rem);
+        }
+
+        .footer-name {
+            grid-column: 1 / 3;
+            text-align: left;
+        }
+
+        .footer-copy {
+            grid-column: 6 / 7;
+            text-align: right;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            display: none;
+            overflow-y: auto;
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-close {
+            position: fixed;
+            top: 30px;
+            right: var(--page-x);
+            z-index: 2600;
+            border: 0;
+            border-bottom: 1px solid currentColor;
+            background: transparent;
+            font-size: clamp(1.4rem, 0.9vw, 2.4rem);
+        }
+
+        .about-content,
+        .project-content {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            column-gap: var(--gap);
+            padding: 128px var(--page-x) 96px;
+        }
+
+        .about-title,
+        .project-title {
+            grid-column: 2 / 6;
+            font-size: clamp(5rem, 7vw, 11rem);
+            font-weight: 520;
+            line-height: 0.95;
+            letter-spacing: 0;
+        }
+
+        .about-copy,
+        .project-copy {
+            grid-column: 3 / 6;
+            margin-top: 48px;
+            color: var(--muted);
+            font-size: clamp(1.8rem, 1.35vw, 2.6rem);
+            line-height: 1.45;
+        }
+
+        .project-meta-line {
+            grid-column: 3 / 6;
+            margin-top: 24px;
+            color: var(--ink);
+            font-size: clamp(1.4rem, 0.9vw, 1.8rem);
+            font-weight: 600;
+        }
+
+        .project-detail-list {
+            grid-column: 3 / 6;
+            display: grid;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 28px;
+            border-top: 1px solid var(--line);
+            list-style: none;
+            color: var(--muted);
+            font-size: clamp(1.4rem, 0.95vw, 1.9rem);
+            line-height: 1.45;
+        }
+
+        .project-detail-list strong {
+            color: var(--ink);
+            font-weight: 650;
+        }
+
+        .about-links {
+            grid-column: 3 / 6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-top: 44px;
+            font-size: clamp(1.5rem, 1vw, 2rem);
+        }
+
+        .about-links a {
+            border-bottom: 1px solid currentColor;
+        }
+
+        .project-media {
+            grid-column: 1 / 7;
+            margin-bottom: 60px;
+            background: #101010;
+        }
+
+        .project-media iframe,
+        .project-media img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            border: 0;
+            object-fit: cover;
+        }
+
+        @media (max-width: 900px) {
+            :root {
+                --page-x: 20px;
+                --gap: 10px;
+            }
+
+            .site-header {
+                padding-top: 20px;
+            }
+
+            .site-title {
+                grid-column: 1 / 4;
+                font-weight: 650;
+            }
+
+            .nav-list {
+                grid-column: 4 / 7;
+                font-size: 1.4rem;
+            }
+
+            .intro-list {
+                grid-template-rows: repeat(2, auto);
+                gap: 36px 10px;
+                margin-top: 88px;
+                font-size: 1.4rem;
+            }
+
+            .intro-item:first-child,
+            .intro-item:nth-child(3) {
+                grid-column: 1 / 4;
+            }
+
+            .intro-item:nth-child(2),
+            .intro-item:nth-child(4) {
+                grid-column: 4 / 7;
+            }
+
+            .hero-statement {
+                margin-top: 82px;
+            }
+
+            .hero-statement h1 {
+                grid-column: 1 / 7;
+                font-size: clamp(4.6rem, 17vw, 8.8rem);
+            }
+
+            .hero-statement p {
+                grid-column: 2 / 7;
+                margin-top: 28px;
+                font-size: 1.4rem;
+            }
+
+            .works,
+            .work-preview {
+                display: none;
+            }
+
+            .mobile-works {
+                display: block;
+            }
+
+            .contact-panel {
+                padding: 68px 24px 95px;
+            }
+
+            .contact-mail {
+                font-size: clamp(3rem, 9.5vw, 3.6rem);
+            }
+
+            .footer-menu {
+                display: block;
+                padding: 84px 20px 20px;
+                font-size: 1.4rem;
+            }
+
+            .footer-name,
+            .footer-copy {
+                text-align: center;
+            }
+
+            .footer-copy {
+                display: block;
+                margin-top: 12px;
+            }
+
+            .modal-close {
+                top: 20px;
+                right: 20px;
+            }
+
+            .about-content,
+            .project-content {
+                display: block;
+                padding: 90px 20px 58px;
+            }
+
+            .about-title,
+            .project-title {
+                font-size: clamp(4rem, 14vw, 7.2rem);
+            }
+
+            .about-copy,
+            .project-copy,
+            .project-meta-line,
+            .project-detail-list,
+            .about-links {
+                margin-top: 30px;
+            }
+
+            .project-media {
+                margin-bottom: 36px;
+            }
+        }
+        .site-header > nav { grid-column: 5 / 7; }
+        .nav-list { font-size: 1.4rem; }
+        .intro-list { margin-top: 100px; }
+        .hero-statement { margin-top: 80px; }
+        .works { margin-top: 100px; }
+        #selected-work { scroll-margin-top: 32px; }
+        .project-gallery { grid-column: 1 / 7; display: grid; gap: 28px; margin-top: 72px; }
+        .project-gallery img { width: 100%; height: auto; }
+        .project-media img { object-fit: contain; }
+        :focus-visible { outline: 2px solid var(--blue); outline-offset: 6px; }
+        .contact-mail { overflow-wrap: anywhere; }
+        .work-preview::after { background: rgba(0,0,0,.52); mix-blend-mode: normal; }
+        @media(max-width:900px) {
+            .site-header > nav { grid-column: 4 / 7; }
+            .mobile-works { margin-top: 70px; }
+            .intro-head { overflow-wrap: anywhere; }
+            .project-gallery { margin-top: 48px; gap: 16px; }
+        }
+        @media(prefers-reduced-motion:reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition: none !important; animation: none !important; }
+        }
+        #circuit-intro { position:fixed; inset:0; z-index:4000; background:#fafafa; opacity:1; transition:opacity 650ms ease; }
+        #circuit-intro[hidden] { display:none; }
+        #circuit-intro.leaving { opacity:0; pointer-events:none; }
+        #circuit-intro canvas { width:100%; height:100%; display:block; }
+        #circuit-intro button { position:absolute; right:32px; bottom:30px; background:#fafafa; border:0; border-bottom:1px solid; padding:10px 0; font-size:14px; }
+        .intro-signature { position:absolute; top:30px; left:32px; font-size:14px; letter-spacing:.06em; }
+        body.intro-playing { overflow:hidden; }
+        .hero-statement h1 { font-size:clamp(4.8rem,6.4vw,11rem); line-height:1.02; }
+        @media(max-width:600px) { .hero-statement h1 { font-size:clamp(3.6rem,11vw,6.6rem); } }
+    </style>
+</head>
+<body>
+    <section id="circuit-intro" hidden aria-label="You can do anything with Art">
+        <canvas aria-hidden="true"></canvas>
+        <span class="intro-signature">BI YIMING / 毕一铭</span>
+        <button type="button">Skip intro ↗</button>
+    </section>
+
+    <main class="main" id="main">
+        <div class="work-preview" id="work-preview" aria-hidden="true">
+            <img id="preview-image" src="assets/depth.jpg" alt="">
+        </div>
+
+        <header class="site-header">
+            <p class="site-title"><a href="#top">BI YIMING</a></p>
+            <nav aria-label="Primary">
+                <ul class="nav-list">
+                    <li><a class="nav-link current" href="#selected-work">Work</a></li>
+                    <li><button class="nav-link" type="button" data-open-about>About</button></li>
+                    <li><a class="nav-link" href="mailto:miaoming1226@gmail.com">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="intro-list" id="top" aria-label="Profile summary">
+            <div class="intro-item">
+                <p class="intro-head">BI YIMING</p>
+                <p class="intro-data">毕一铭</p>
+            </div>
+            <div class="intro-item">
+                <p class="intro-head">Computational Arts</p>
+                <p class="intro-data">Sound / Vision / Interaction</p>
+            </div>
+            <div class="intro-item">
+                <p class="intro-head">Goldsmiths</p>
+                <p class="intro-data">University of London</p>
+            </div>
+            <div class="intro-item">
+                <p class="intro-head">Mail : miaoming1226@gmail.com</p>
+                <p class="intro-data">Instagram : @mming1100</p>
+            </div>
+        </section>
+
+        <section class="hero-statement" aria-label="Artist statement">
+            <h1>Investigating how interaction shapes what we perceive as real.</h1>
+            <p>Four projects exploring how movement, algorithms and spatial conditions shape what we see, hear and feel.</p>
+        </section>
+
+        <div id="selected-work"></div>
+        <section class="works" id="works" aria-label="Selected works">
+            <ul class="work-list" id="desktop-work-list"></ul>
+        </section>
+
+        <ul class="mobile-works" id="mobile-work-list" aria-label="Selected works"></ul>
+    </main>
+
+    <footer class="site-footer">
+        <a class="contact-panel" href="mailto:miaoming1226@gmail.com">
+            <p class="contact-caption">Get in Touch</p>
+            <p class="contact-mail">miaoming1226@gmail.com</p>
+        </a>
+        <div class="footer-menu">
+            <p class="footer-name">BI YIMING</p>
+            <small class="footer-copy">&copy; 2026 BI YIMING.</small>
+        </div>
+    </footer>
+
+    <section class="modal" role="dialog" aria-modal="true" id="about-modal" aria-label="About BI YIMING" aria-hidden="true">
+        <button class="modal-close" type="button" data-close-modal>Close</button>
+        <div class="about-content">
+            <h2 class="about-title">Hi, this is BI YIMING.</h2>
+            <p class="about-copy">My practice brings together computational arts, interaction design and spatial installation. Through sound, computer vision and embodied interfaces, I explore how perception is shaped by movement, technological systems and the conditions of viewing.</p>
+            <div class="about-links">
+                <a href="mailto:miaoming1226@gmail.com">Email</a>
+                <a href="https://www.instagram.com/mming1100" target="_blank" rel="noreferrer">Instagram</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal" role="dialog" aria-modal="true" id="project-modal" aria-label="Project detail" aria-hidden="true">
+        <button class="modal-close" type="button" data-close-modal>Back</button>
+        <div class="project-content">
+            <div class="project-media" id="project-media"></div>
+            <h2 class="project-title" id="project-title"></h2>
+            <p class="project-copy" id="project-copy"></p>
+            <p class="project-meta-line" id="project-meta-line"></p>
+            <ul class="project-detail-list" id="project-detail-list"></ul>
+            <div id="project-gallery" class="project-gallery"></div>
+        </div>
+    </section>
+
+    <script>
+        const projects = [
+    {
+        "number": "001",
+        "title": "Voice From the Depth",
+        "type": "Audiovisual Interaction",
+        "date": "Gesture / Sound / Image",
+        "image": "assets/depth.jpg",
+        "youtube": "sFToptVQ9xo",
+        "pages": [
+            4,
+            5,
+            6
+        ],
+        "description": "A gesture-driven audiovisual experience in which hand movement shapes an ocean soundscape, and sound unfolds into generative visual movement.",
+        "meta": "Max/MSP · Python · MediaPipe · OpenCV",
+        "details": [
+            [
+                "Concept",
+                "Inspired by the shifting forms and acoustic textures of the ocean, the work explores the tension between stillness and turbulence through bodily movement."
+            ],
+            [
+                "Role",
+                "Concept development, sound-system design, generative visual design and interaction design."
+            ],
+            [
+                "Sound and visual development",
+                "Field recordings informed a synthesised ocean soundscape in Max/MSP. Observations of wave movement, density and lingering traces shaped the generative imagery."
+            ],
+            [
+                "Interaction",
+                "Python tracks hand movement and sends speed data to Max/MSP through OSC. Faster movement increases sound intensity; audio amplitude drives the visuals. When the hand leaves the camera’s view, the experience gradually returns to a quieter state."
+            ]
+        ]
+    },
+    {
+        "number": "002",
+        "title": "Static Identity",
+        "type": "Interactive Installation",
+        "date": "Computer Vision / AI",
+        "image": "assets/identity.jpg",
+        "youtube": "fu2ntXHMCaA",
+        "pages": [
+            9,
+            10,
+            11
+        ],
+        "description": "An AI-driven interactive installation that classifies a viewer’s clothing and exposes how algorithmic vision reduces identity to predefined categories.",
+        "meta": "YOLOv11 · OpenCV · Python",
+        "details": [
+            [
+                "When recognition becomes reduction",
+                "The system excludes the face, yet continues to judge the viewer through clothing, silhouette, footwear and environmental context. The work questions whether removing facial information is enough to prevent algorithmic profiling."
+            ],
+            [
+                "Role",
+                "Concept development, computer vision system design, machine learning implementation and interaction design."
+            ],
+            [
+                "System",
+                "Body detection divides the figure into upper-body, lower-body and footwear regions. Each crop is standardised and independently classified, producing a style label and confidence score."
+            ],
+            [
+                "Bias",
+                "A deliberately limited fashion dataset and contextual influences produce partial, unstable readings. These predictions remain visible to expose the limits of algorithmic judgement."
+            ]
+        ]
+    },
+    {
+        "number": "003",
+        "title": "Did You See It?",
+        "type": "Embodied Interaction",
+        "date": "Blink / Touch / Access",
+        "image": "assets/clarity.jpg",
+        "video": "1184602887",
+        "pages": [
+            14,
+            15
+        ],
+        "description": "An interactive visual experience in which blinking and touch briefly restore clarity, while a QR code offers a more persistent but system-dependent view.",
+        "meta": "MediaPipe · p5.js · ESP32 · Web Serial",
+        "details": [
+            [
+                "Clarity as a temporary condition",
+                "The project began with an experience of finding clear vision physically difficult to maintain. It treats clarity as something temporary, repeatedly restored through bodily and technological intervention."
+            ],
+            [
+                "Role",
+                "Concept development, interaction design, physical interface design and web-based system development."
+            ],
+            [
+                "Blink and touch",
+                "MediaPipe detects repeated blinking. A touch board connects through ESP32 and Web Serial. Both routes trigger three seconds of clarity before the image returns to blur."
+            ],
+            [
+                "QR-code access",
+                "A personal device offers a clearer, more persistent image through a separate digital system. This contrasts repeated bodily effort with system-mediated access."
+            ]
+        ]
+    },
+    {
+        "number": "004",
+        "title": "The Unseen Within",
+        "type": "Spatial Installation",
+        "date": "Presence / Perception",
+        "image": "assets/unseen.jpg",
+        "video": "1223127498",
+        "pages": [
+            18,
+            19,
+            20,
+            21
+        ],
+        "description": "An interactive installation exploring how a digitally constructed form can still produce a sense of presence despite having no physical body.",
+        "meta": "TouchDesigner · Leap Motion · Webcam / YOLO · Projection · Acrylic Reflection",
+        "details": [
+            [
+                "Knowing and feeling",
+                "Viewers know the form is digitally constructed, yet movement, apparent depth, darkness and spatial isolation can make it feel temporarily present."
+            ],
+            [
+                "Role",
+                "Spatial concept, installation design, interaction logic and visual system development."
+            ],
+            [
+                "Spatial development",
+                "Spatial studies, material testing and visual trials refined the suspended form, enclosed structure and conditions of viewing."
+            ],
+            [
+                "Interaction",
+                "The system responds in two stages: presence triggers interruption, while close interaction produces instability and reconfiguration."
+            ],
+            [
+                "Constructing presence",
+                "Continuous movement suggests vitality; reflection and layering create apparent depth. Darkness reduces surrounding information, and the enclosure gives the form its own perceptual space."
+            ]
+        ]
+    }
+];
+
+        const main = document.getElementById("main");
+        const preview = document.getElementById("work-preview");
+        const previewImage = document.getElementById("preview-image");
+        const desktopList = document.getElementById("desktop-work-list");
+        const mobileList = document.getElementById("mobile-work-list");
+        const projectModal = document.getElementById("project-modal");
+        const aboutModal = document.getElementById("about-modal");
+        const projectMedia = document.getElementById("project-media");
+        const projectTitle = document.getElementById("project-title");
+        const projectCopy = document.getElementById("project-copy");
+        const projectMetaLine = document.getElementById("project-meta-line");
+        const projectDetailList = document.getElementById("project-detail-list");
+
+        let returnFocus;
+        function openModal(modal) {
+            returnFocus = document.activeElement;
+            hidePreview();
+            main.inert = true;
+            document.querySelector(".site-footer").inert = true;
+            modal.classList.add("active");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("modal-open");
+            modal.scrollTop = 0;
+            modal.querySelector("button").focus();
+        }
+
+        function closeModals() {
+            document.querySelectorAll(".modal").forEach((modal) => {
+                modal.classList.remove("active");
+                modal.setAttribute("aria-hidden", "true");
+            });
+            projectMedia.innerHTML = "";
+            projectDetailList.innerHTML = "";
+            document.body.classList.remove("modal-open");
+            main.inert = false;
+            document.querySelector(".site-footer").inert = false;
+            returnFocus?.focus();
+        }
+
+        function openProject(project) {
+            projectTitle.textContent = project.title;
+            projectCopy.textContent = project.description;
+            projectMetaLine.textContent = project.meta || "";
+            projectDetailList.innerHTML = (project.details || []).map(([label, text]) => `
+                <li><strong>${label}</strong> - ${text}</li>
+            `).join("");
+            if (project.youtube) {
+                projectMedia.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${project.youtube}" allow="fullscreen; picture-in-picture" allowfullscreen title="${project.title} — demonstration"></iframe>`;
+            } else if (project.video) {
+                projectMedia.innerHTML = `<iframe src="https://player.vimeo.com/video/${project.video}?title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="${project.title}"></iframe>`;
+            } else {
+                projectMedia.innerHTML = `<img src="${project.image}" alt="${project.title}">`;
+            }
+            const gallery = document.getElementById("project-gallery");
+            gallery.innerHTML = `<a class="video-link" href="${project.youtube ? 'https://youtu.be/'+project.youtube : 'https://vimeo.com/'+project.video}" target="_blank" rel="noreferrer">Watch demonstration ↗</a>` + (project.pages || []).map(n => `<figure><img src="assets/computational-${String(n).padStart(2,'0')}.jpg" alt="${project.title} — portfolio page ${n}" loading="lazy"></figure>`).join("");
+            openModal(projectModal);
+        }
+
+        function renderWorks() {
+            desktopList.innerHTML = projects.map((project, index) => `
+                <li class="work-item" data-index="${index}">
+                    <button class="work-link" type="button">
+                        <span class="work-number">${project.number}</span>
+                        <span class="work-title">${project.title}</span>
+                        <span class="work-type">${project.type}</span>
+                        <span class="work-date">${project.date}</span>
+                    </button>
+                </li>
+            `).join("");
+
+            mobileList.innerHTML = projects.map((project, index) => `
+                <li class="mobile-item">
+                    <button class="mobile-button" type="button" data-index="${index}">
+                        <span class="mobile-image"><img src="${project.image}" alt="${project.title}"></span>
+                        <span class="mobile-meta">
+                            <span class="mobile-number">${project.number}</span>
+                            <span class="mobile-title">${project.title}</span>
+                            <span class="mobile-type">${project.type}</span>
+                            <span class="mobile-date">${project.date}</span>
+                        </span>
+                    </button>
+                </li>
+            `).join("");
+
+            document.querySelectorAll(".work-item").forEach((item) => {
+                const project = projects[Number(item.dataset.index)];
+                item.addEventListener("mouseenter", () => {
+                    previewImage.src = project.image;
+                    previewImage.alt = project.title;
+                    preview.classList.add("is-visible");
+                    main.classList.add("is-previewing");
+                });
+                item.addEventListener("focusin", () => {
+                    previewImage.src = project.image;
+                    previewImage.alt = project.title;
+                    preview.classList.add("is-visible");
+                    main.classList.add("is-previewing");
+                });
+                item.addEventListener("mouseleave", hidePreview);
+                item.addEventListener("focusout", hidePreview);
+                item.querySelector("button").addEventListener("click", () => openProject(project));
+            });
+
+            document.querySelectorAll(".mobile-button").forEach((button) => {
+                button.addEventListener("click", () => openProject(projects[Number(button.dataset.index)]));
+            });
+        }
+
+        function hidePreview() {
+            preview.classList.remove("is-visible");
+            main.classList.remove("is-previewing");
+        }
+
+        document.querySelectorAll("[data-open-about]").forEach((button) => {
+            button.addEventListener("click", () => openModal(aboutModal));
+        });
+
+        document.querySelectorAll("[data-close-modal]").forEach((button) => {
+            button.addEventListener("click", closeModals);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeModals();
+        });
+
+        renderWorks();
+
+    </script>
+    <script src="intro.js"></script>
+</body>
+</html>
